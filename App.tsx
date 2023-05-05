@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Image,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
-  Dimensions,
   Vibration,
   useColorScheme,
   ImageBackground,
@@ -15,7 +14,12 @@ import {
   BackHandler,
 } from 'react-native';
 
+// Suppress warning message from outdated dependency
+import {LogBox} from 'react-native';
+LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
+
 import Sound from 'react-native-sound';
+import Call from './components/Call';
 
 const ringtone = new Sound('john_pork_call.mp3', Sound.MAIN_BUNDLE, err => {
   if (err) {
@@ -28,8 +32,14 @@ Sound.setCategory('Playback');
 
 const VIBRATE_PATTERN = [1000, 1000];
 
+function stopRinging() {
+  ringtone.stop();
+  Vibration.cancel();
+}
+
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [inCall, setInCall] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -42,6 +52,9 @@ function App(): JSX.Element {
         }, 2);
       });
 
+      ringtone.setCurrentTime(0);
+      ringtone.setSpeed(1);
+      ringtone.setPitch(1);
       ringtone.setVolume(1);
       ringtone.setNumberOfLoops(-1);
       ringtone.play();
@@ -49,13 +62,10 @@ function App(): JSX.Element {
       Vibration.vibrate(VIBRATE_PATTERN, true);
     })();
 
-    return () => {
-      ringtone.release();
-      Vibration.cancel();
-    };
+    return stopRinging;
   }, []);
 
-  return (
+  return !inCall ? (
     <SafeAreaView style={styles.body}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 
@@ -74,7 +84,10 @@ function App(): JSX.Element {
           <View style={styles.buttons}>
             <TouchableOpacity
               style={styles.callButton}
-              onPress={() => BackHandler.exitApp()}>
+              onPress={() => {
+                stopRinging();
+                BackHandler.exitApp();
+              }}>
               <Image
                 source={require('./assets/images/CallDecline.png')}
                 style={styles.callIcon}
@@ -82,7 +95,12 @@ function App(): JSX.Element {
 
               <Text style={styles.callText}>Decline</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.callButton}>
+            <TouchableOpacity
+              style={styles.callButton}
+              onPress={() => {
+                stopRinging();
+                setInCall(true);
+              }}>
               <Image
                 source={require('./assets/images/CallAccept.png')}
                 style={styles.callIcon}
@@ -94,6 +112,8 @@ function App(): JSX.Element {
         </View>
       </ImageBackground>
     </SafeAreaView>
+  ) : (
+    <Call setCallStatus={setInCall} />
   );
 }
 

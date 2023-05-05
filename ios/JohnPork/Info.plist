@@ -25,6 +25,10 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
+	<key>NSCameraUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs access to your Camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need your permission to use the microphone.</string>
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
