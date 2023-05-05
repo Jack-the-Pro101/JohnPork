@@ -100,36 +100,35 @@ export default function Call({
         ).cam;
       } else {
       }
-
-      async function playOink() {
-        const random = Math.floor(Math.random() * 7) + 1;
-
-        const oink = new Sound(`oink_${random}.mp3`, Sound.MAIN_BUNDLE, err => {
-          if (err) console.error(err);
-        });
-
-        await new Promise(resolve => {
-          const checkLoaded = setInterval(() => {
-            if (oink.isLoaded()) {
-              clearInterval(checkLoaded);
-              resolve(true);
-            }
-          }, 50);
-        });
-
-        oink.play();
-
-        setTimeout(() => {
-          oink.release();
-          playOink();
-        }, oink.getDuration() * 1000 + Math.floor(Math.random() * 5000));
-      }
-
-      playOink();
     })();
+
+    async function playOink() {
+      const random = Math.floor(Math.random() * 7) + 1;
+
+      const oink = new Sound(`oink_${random}.mp3`, Sound.MAIN_BUNDLE, err => {
+        if (err) console.error(err);
+      });
+
+      await new Promise(resolve => {
+        const checkLoaded = setInterval(() => {
+          if (oink.isLoaded()) {
+            clearInterval(checkLoaded);
+            resolve(true);
+          }
+        }, 50);
+      });
+
+      oink.play();
+
+      setTimeout(() => {
+        oink.release();
+        playOink();
+      }, oink.getDuration() * 1000 + Math.floor(Math.random() * 5000));
+    }
 
     setTimeout(() => {
       setFakeLoading(false);
+      playOink();
     }, Math.max(Math.floor(Math.random() * 2000), 350));
   }, []);
 
